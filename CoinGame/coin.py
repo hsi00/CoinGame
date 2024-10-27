@@ -1,20 +1,23 @@
 import os
+import sys
 import pygame
 import random
 from pygame.constants import QUIT
 from collections import deque
 from stock import Stock
+from button import Button
 
 pygame.init() # 초기화 (반드시 필요)
 
 screen_width = 1280
 screen_height = 720
-screen = pygame.display.set_mode((screen_width, screen_height))
+SCREEN = pygame.display.set_mode((screen_width, screen_height))
 
 pygame.display.set_caption("CoinGame")
 
 current_path = os.path.dirname(__file__)     
 image_path = os.path.join(current_path, "images")
+font_path = os.path.join(current_path, "font")
 background = pygame.transform.scale(pygame.image.load(os.path.join(image_path, "background.png")), (1280, 1280))
 
 stocks = []
@@ -29,22 +32,56 @@ pygame.time.set_timer(STOCK_TIMER, 50) #주기 (ms단위)
 clock = pygame.time.Clock()
 fps = 60
 
-running = True
-while running:
-    clock.tick(fps)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+def get_font(size):
+    return pygame.font.Font(os.path.join(font_path, "font.ttf"), size)
 
-        elif event.type == STOCK_TIMER: #그래프 수치 생성, 저장
-            for stock in stocks:
-                stock.stock()
+def start(): #시작 메뉴
+    running = True
+    while running:
+        clock.tick(fps)
 
-    
-    screen.blit(background, (0, 0))
-    #screen.fill((255,255,255))
-    stocks[stock_to_show].rect(pygame, screen)
-    stocks[stock_to_show].update(pygame, screen)
-    pygame.display.update()
+        mouse_pos = pygame.mouse.get_pos()
+        PLAY_BUTTON = Button(None, (640,360), "PLAY", get_font(75), '#585391', "White")
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if PLAY_BUTTON.checkForInput(mouse_pos):
+                    game()
+                    break
+
+        a = get_font(100).render("COIN GAME", True, "#585391")
+        b = a.get_rect(center=(640, 150))
+
+        SCREEN.blit(background, (0, 0))
+        SCREEN.blit(a, b)
+        PLAY_BUTTON.changeColor(mouse_pos)
+        PLAY_BUTTON.update(SCREEN)
+        #screen.fill((255,255,255))
+        pygame.display.update()
+
+def game(): #게임 화면
+    running = True
+    while running:
+        clock.tick(fps)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
+
+            elif event.type == STOCK_TIMER: #그래프 수치 생성, 저장
+                for stock in stocks:
+                    stock.stock()
+
+        
+        SCREEN.blit(background, (0, 0))
+        #screen.fill((255,255,255))
+        stocks[stock_to_show].rect(pygame, SCREEN)
+        stocks[stock_to_show].update(pygame, SCREEN)
+        pygame.display.update()
+
+start()
 
 pygame.quit()
