@@ -7,7 +7,7 @@ from collections import deque
 from stock import Stock
 from button import Button
 
-pygame.init() # 초기화 (반드시 필요)
+pygame.init()
 
 screen_width = 1280
 screen_height = 720
